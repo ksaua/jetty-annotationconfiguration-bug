@@ -1,0 +1,44 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+    compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
+    compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
+    compile 'org.eclipse.jetty:jetty-annotations:9.3.0.M0'
+}
+
+sourceSets {
+    externalJar {
+        java {
+            srcDir 'src/externalJar/java'
+        }
+    }
+}
+
+compileExternalJarJava {
+    classpath = configurations.compile
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+task externalJar(type: Jar) {
+    baseName 'externaljar'
+    from { sourceSets.externalJar.output }
+}
+
+task war(type: Jar, dependsOn: externalJar) {
+    manifest {
+        attributes "Main-Class": "no.saua.jettybug.EmbeddedJetty"
+    }
+    from { sourceSets.main.output } 
+    from { configurations.compile.collect { project.zipTree(it) } }
+    
+    into('WEB-INF/lib') {
+        from { externalJar.outputs.files }
+    }
+}
