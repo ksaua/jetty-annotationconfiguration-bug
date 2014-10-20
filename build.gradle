@@ -42,3 +42,7 @@ task war(type: Jar, dependsOn: externalJar) {
         from { externalJar.outputs.files }
     }
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
